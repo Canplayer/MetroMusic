@@ -1,0 +1,194 @@
+package com.canplayer.music.metro.ui.Activity;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.Color;
+import android.os.Build;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+
+import com.canplayer.music.metro.Setting;
+import com.canplayer.music.metro.animation.Baseanimation.Rotate3dAnimation;
+
+
+interface animSetter {
+    void setAnim();
+
+}
+
+
+@SuppressLint("Registered")
+public class BasePage extends AppCompatActivity {
+
+    private enum PageThemeSettings {
+        Light,
+        Black,
+        Auto
+    }
+    private enum PageTheme {
+        Light,
+        Black
+    }
+    static boolean isThemeFallowAndroid;
+    private PageTheme pageTheme;
+    private PageThemeSettings onCreateTheme;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        initTheme(onCreateTheme = pageThemeSettings());
+        super.onCreate(savedInstanceState);
+        initBar();
+    }
+
+    //在setContentView后设置动画
+    public void setPageView(int layoutResID) {
+        super.setContentView(layoutResID);
+        InPageAnim();
+    }
+    public void setPageView(int layoutResID,animSetter l) {
+        super.setContentView(layoutResID);
+        l.setAnim();
+    }
+
+    //设置沉浸,由于设置状态栏沉浸需要API23以上，未来如需要兼容旧版本可以去掉沉浸
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void initBar(){
+        int option = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+        getWindow().setNavigationBarColor(Color.TRANSPARENT);
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
+        if(isThemeFallowAndroid) {
+            switch (readSystemTheme(getResources().getConfiguration())) {
+                case Black:
+                    pageTheme = PageTheme.Black;
+                    break;
+                case Light:
+                    pageTheme = PageTheme.Light;
+                    break;
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (pageTheme == PageTheme.Light)
+                getWindow().getDecorView().setSystemUiVisibility(option | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            if (pageTheme == PageTheme.Black)
+                getWindow().getDecorView().setSystemUiVisibility(option);
+        }
+
+    }
+
+    //设置主题为浅色
+    public void setLightTheme() {
+        pageTheme = PageTheme.Light;
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        recreate();
+    }
+    //设置主题为深色
+    public void setBlackTheme() {
+        pageTheme = PageTheme.Black;
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        recreate();
+    }
+
+    //获取系统当前主题
+    private PageTheme readSystemTheme(Configuration newConfig) {
+        if(isThemeFallowAndroid) {
+            int mSysThemeConfig = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            switch (mSysThemeConfig) {
+                case Configuration.UI_MODE_NIGHT_NO:
+                    return PageTheme.Light;
+                case Configuration.UI_MODE_NIGHT_YES:
+                    return PageTheme.Black;
+            }
+        }
+        return PageTheme.Black;
+    }
+
+    //监听系统主题变化
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        switch (readSystemTheme(newConfig)){
+            case Black:setBlackTheme();break;
+            case Light:setLightTheme();break;
+        }
+    }
+    //初始化时用于获取Android当前主题
+    public void initTheme(PageThemeSettings pageThemeSettings){
+        Log.d("初始化","");
+        switch (pageThemeSettings) {
+            case Auto:
+                isThemeFallowAndroid = true;
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                break;
+            case Light:
+                isThemeFallowAndroid = false;
+                pageTheme = PageTheme.Light;
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);break;
+            case Black:
+                isThemeFallowAndroid = false;
+                pageTheme = PageTheme.Black;
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);break;
+        }
+    }
+
+    //获取全局主题设置
+    private PageThemeSettings pageThemeSettings() {
+        switch (Setting.getGlobalPageTheme())
+        {
+            case Light:return PageThemeSettings.Light;
+            case Black:return PageThemeSettings.Black;
+            case WithAndroid:return PageThemeSettings.Auto;
+        }
+        return PageThemeSettings.Black;
+    }
+
+    //回到该页面的时候检查主题设置是否一致
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(onCreateTheme != pageThemeSettings()) recreate();
+    }
+
+    //获取XML根控件,在本类中被用于设置动画
+    private View getRootContentView() {
+        ViewGroup view = (ViewGroup) getWindow().getDecorView().findViewById(android.R.id.content);
+        return view.getChildAt(0);
+    }
+
+    //设置页面进入动画
+    public void InPageAnim() {
+            Rotate3dAnimation in = new Rotate3dAnimation(90, 0,0,500,0,true);
+            in.setDuration(2000);
+            getRootContentView().startAnimation(in);
+    }
+
+    //页面结束
+    @Override
+    public void finish() {
+        //TODO 在此处实现页面跳转动画;此处有个问题，如果切换主题模式后按下返回键会发生闪烁
+
+        super.finish();
+        overridePendingTransition(0, 0);
+    }
+
+    //页面跳转
+    public void openPage(Class newPageClass) {
+        //TODO 在此处实现页面跳转动画
+        //将本activity传入下一个页面，以便设置主题
+        this.getClass();
+        Intent intent = new Intent(this,newPageClass);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        super.startActivity(intent);
+    }
+}
+

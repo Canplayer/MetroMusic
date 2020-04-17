@@ -3,9 +3,16 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
+        <!--ActionBar颜色-->
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <!--强调色-->
         <item name="colorAccent">@color/colorAccent</item>
+
+        <!--注意！以下设置会影响启动Activity时的颜色-->
+        <!--状态栏颜色-->
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <!--<item name="android:navigationBarColor"></item>-->
+        <item name="android:background">@color/background</item>
     </style>
 
 </resources>
