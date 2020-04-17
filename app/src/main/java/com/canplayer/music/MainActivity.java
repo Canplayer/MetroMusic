@@ -4,9 +4,14 @@ package com.canplayer.music;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
+import android.view.animation.Animation;
+import android.widget.LinearLayout;
 
+import com.canplayer.music.metro.animation.Baseanimation.Rotate3dAnimation;
+import com.canplayer.music.metro.animation.defaultanimation.DefaultAnimation;
 import com.canplayer.music.metro.ui.Activity.BasePage;
 import com.canplayer.music.metro.Setting;
+import com.canplayer.music.metro.ui.Activity.animSetter;
 
 
 public class MainActivity extends BasePage {
@@ -14,7 +19,13 @@ public class MainActivity extends BasePage {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        loadPageView(R.layout.activity_main);
+        /**TODO 已完成的方法
+         - onCreate中可以设置主题（要求必须在super.onCreate之前设置）
+         - 可以设置Page本体的主体动画（重载loadPageView中设定）<-可以在此中手动自定义控件动画
+         ？ 可以设置Page 销毁动画
+         - 可以动态设置主题
+         */
 
         this.findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,7 +63,9 @@ public class MainActivity extends BasePage {
         this.findViewById(R.id.button6).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openOptionsMenu();
+                //openOptionsMenu();
+                Animation animation = new DefaultAnimation().inAnimation(v,MainActivity.this);
+                v.startAnimation(animation);
             }
         });
     }
@@ -68,5 +81,7 @@ public class MainActivity extends BasePage {
         menu.add(Menu.NONE, Menu.FIRST + 6, 3, "发送").setIcon(android.R.drawable.ic_menu_send);
         return true;
     }
+
+
 
 }

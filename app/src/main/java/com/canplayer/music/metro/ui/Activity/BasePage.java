@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,13 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.canplayer.music.metro.Setting;
-import com.canplayer.music.metro.animation.Baseanimation.Rotate3dAnimation;
-
-
-interface animSetter {
-    void setAnim();
-
-}
+import com.canplayer.music.metro.animation.defaultanimation.DefaultAnimation;
 
 
 @SuppressLint("Registered")
@@ -49,17 +44,17 @@ public class BasePage extends AppCompatActivity {
         initBar();
     }
 
-    //在setContentView后设置动画
-    public void setPageView(int layoutResID) {
+    //-在setContentView后设置动画
+    public void loadPageView(int layoutResID) {
         super.setContentView(layoutResID);
-        InPageAnim();
+        //InPageAnim();
     }
-    public void setPageView(int layoutResID,animSetter l) {
+    public void loadPageView(int layoutResID,animSetter l) {
         super.setContentView(layoutResID);
-        l.setAnim();
+        getRootContentView().startAnimation(l.animation());
     }
 
-    //设置沉浸,由于设置状态栏沉浸需要API23以上，未来如需要兼容旧版本可以去掉沉浸
+    //-设置沉浸,由于设置状态栏沉浸需要API23以上，未来如需要兼容旧版本可以去掉沉浸
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void initBar(){
         int option = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -86,20 +81,20 @@ public class BasePage extends AppCompatActivity {
 
     }
 
-    //设置主题为浅色
+    //-设置主题为浅色
     public void setLightTheme() {
         pageTheme = PageTheme.Light;
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         recreate();
     }
-    //设置主题为深色
+    //-设置主题为深色
     public void setBlackTheme() {
         pageTheme = PageTheme.Black;
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         recreate();
     }
 
-    //获取系统当前主题
+    //-获取系统当前主题
     private PageTheme readSystemTheme(Configuration newConfig) {
         if(isThemeFallowAndroid) {
             int mSysThemeConfig = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
@@ -113,7 +108,7 @@ public class BasePage extends AppCompatActivity {
         return PageTheme.Black;
     }
 
-    //监听系统主题变化
+    //-监听系统主题变化
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -141,7 +136,7 @@ public class BasePage extends AppCompatActivity {
         }
     }
 
-    //获取全局主题设置
+    //-从SettingClass取全局主题设置
     private PageThemeSettings pageThemeSettings() {
         switch (Setting.getGlobalPageTheme())
         {
@@ -152,7 +147,7 @@ public class BasePage extends AppCompatActivity {
         return PageThemeSettings.Black;
     }
 
-    //回到该页面的时候检查主题设置是否一致
+    //TODO 待优化回到该页面的时候检查主题设置是否一致
     @Override
     protected void onResume() {
         super.onResume();
@@ -166,10 +161,10 @@ public class BasePage extends AppCompatActivity {
     }
 
     //设置页面进入动画
-    public void InPageAnim() {
-            Rotate3dAnimation in = new Rotate3dAnimation(90, 0,0,500,0,true);
-            in.setDuration(2000);
-            getRootContentView().startAnimation(in);
+    private void InPageAnim() {
+        View view = getRootContentView();
+        Animation animation = new DefaultAnimation().inAnimation(view,this);
+        getRootContentView().startAnimation(animation);
     }
 
     //页面结束
@@ -182,13 +177,41 @@ public class BasePage extends AppCompatActivity {
     }
 
     //页面跳转
-    public void openPage(Class newPageClass) {
+    public void openPage(final Class newPageClass) {
         //TODO 在此处实现页面跳转动画
         //将本activity传入下一个页面，以便设置主题
-        this.getClass();
+        Animation animation = new DefaultAnimation().outAnimation(getRootContentView(),this);
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                gotoPage(newPageClass);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        animation.setFillAfter(false);
+        getRootContentView().startAnimation(animation);
+
+    }
+    public void gotoPage(Class newPageClass){
         Intent intent = new Intent(this,newPageClass);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        super.startActivity(intent);
+        this.startActivity(intent);
+    }
+    
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        InPageAnim();
     }
 }
 
