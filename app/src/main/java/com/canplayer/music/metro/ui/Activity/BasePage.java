@@ -6,6 +6,7 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,11 +48,17 @@ public class BasePage extends AppCompatActivity {
     //-在setContentView后设置动画
     public void loadPageView(int layoutResID) {
         super.setContentView(layoutResID);
-        //InPageAnim();
+        InPageAnim();
     }
-    public void loadPageView(int layoutResID,animSetter l) {
+    public void loadPageView(int layoutResID, animationSetter l) {
         super.setContentView(layoutResID);
         getRootContentView().startAnimation(l.animation());
+    }
+    public void loadPageView(int layoutResID,boolean isAnimationOFF) {
+        super.setContentView(layoutResID);
+        if (!isAnimationOFF){
+            InPageAnim();
+        }
     }
 
     //-设置沉浸,由于设置状态栏沉浸需要API23以上，未来如需要兼容旧版本可以去掉沉浸
@@ -155,16 +162,23 @@ public class BasePage extends AppCompatActivity {
     }
 
     //获取XML根控件,在本类中被用于设置动画
-    private View getRootContentView() {
+    public View getRootContentView() {
         ViewGroup view = (ViewGroup) getWindow().getDecorView().findViewById(android.R.id.content);
         return view.getChildAt(0);
     }
 
     //设置页面进入动画
     private void InPageAnim() {
-        View view = getRootContentView();
-        Animation animation = new DefaultAnimation().inAnimation(view,this);
+        final View view = getRootContentView();
+        Animation animation = new DefaultAnimation().inAnimation_Page(getApplicationContext().getResources().getDisplayMetrics().heightPixels,BasePage.this);
         getRootContentView().startAnimation(animation);
+        view.post(new Runnable() {
+            @Override
+            public void run() {
+//                Animation animation = new DefaultAnimation().inAnimation(view,BasePage.this);
+//                getRootContentView().startAnimation(animation);
+            }
+        });
     }
 
     //页面结束
@@ -180,38 +194,23 @@ public class BasePage extends AppCompatActivity {
     public void openPage(final Class newPageClass) {
         //TODO 在此处实现页面跳转动画
         //将本activity传入下一个页面，以便设置主题
+        final Intent intent = new Intent(this,newPageClass);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         Animation animation = new DefaultAnimation().outAnimation(getRootContentView(),this);
-        animation.setAnimationListener(new Animation.AnimationListener() {
+
+        new Handler().postDelayed(new Runnable() {
             @Override
-            public void onAnimationStart(Animation animation) {
-
+            public void run() {
+                startActivity(intent);
             }
+        },100);
 
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                gotoPage(newPageClass);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-        animation.setFillAfter(false);
+        //animation.setFillAfter(true);
         getRootContentView().startAnimation(animation);
 
     }
-    public void gotoPage(Class newPageClass){
-        Intent intent = new Intent(this,newPageClass);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        this.startActivity(intent);
-    }
     
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        InPageAnim();
-    }
+
 }
 

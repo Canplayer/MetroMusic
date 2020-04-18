@@ -1,17 +1,16 @@
 package com.canplayer.music;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.view.animation.Animation;
-import android.widget.LinearLayout;
 
-import com.canplayer.music.metro.animation.Baseanimation.Rotate3dAnimation;
+import com.canplayer.music.metro.animation.Baseanimation.BaseRotate3dAnimation;
 import com.canplayer.music.metro.animation.defaultanimation.DefaultAnimation;
 import com.canplayer.music.metro.ui.Activity.BasePage;
 import com.canplayer.music.metro.Setting;
-import com.canplayer.music.metro.ui.Activity.animSetter;
 
 
 public class MainActivity extends BasePage {
@@ -64,8 +63,7 @@ public class MainActivity extends BasePage {
             @Override
             public void onClick(View v) {
                 //openOptionsMenu();
-                Animation animation = new DefaultAnimation().inAnimation(v,MainActivity.this);
-                v.startAnimation(animation);
+                openPage(AboutActivity.class);
             }
         });
     }

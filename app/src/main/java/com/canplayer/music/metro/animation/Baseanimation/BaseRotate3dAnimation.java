@@ -9,9 +9,13 @@ import android.view.animation.Transformation;
 /**
  * 一个动画，它将Y轴上的视图在两个指定角度之间旋转。 此动画还在Z轴（深度）上添加了平移以改善效果
  */
-public class Rotate3dAnimation extends Animation {
-    private final float mFromDegrees;
-    private final float mToDegrees;
+public class BaseRotate3dAnimation extends Animation {
+    private final float mFromDegreesX;
+    private final float mToDegreesX;
+    private final float mFromDegreesY;
+    private final float mToDegreesY;
+    private final float mFromDegreesZ;
+    private final float mToDegreesZ;
     private final float mCenterX;
     private final float mCenterY;
     private final float mDepthZ;
@@ -31,16 +35,21 @@ public class Rotate3dAnimation extends Animation {
      * @param reverse     true 表示由从0到depthZ，false相反
      */
 
-    public Rotate3dAnimation(Context context, float fromDegrees, float toDegrees,
-                             float centerX, float centerY, float depthZ, boolean reverse) {
-        mFromDegrees = fromDegrees;
-        mToDegrees = toDegrees;
+    @Deprecated
+    public BaseRotate3dAnimation(float[] fromDegrees, float[] toDegrees,
+                                 float centerX, float centerY, float depthZ, boolean reverse, Context context) {
+        mFromDegreesX = fromDegrees[0];
+        mToDegreesX = toDegrees[0];
+        mFromDegreesY = fromDegrees[1];
+        mToDegreesY = toDegrees[1];
+        mFromDegreesZ = fromDegrees[0];
+        mToDegreesZ = toDegrees[0];
         mCenterX = centerX;
         mCenterY = centerY;
         mDepthZ = depthZ;
         mReverse = reverse;
         // 获取手机像素密度 （即dp与px的比例）
-        scale = context.getResources().getDisplayMetrics().density;
+        scale =context.getResources().getDisplayMetrics().density;
     }
 
     @Override
@@ -51,8 +60,9 @@ public class Rotate3dAnimation extends Animation {
 
     @Override
     protected void applyTransformation(float interpolatedTime, Transformation t) {
-        final float fromDegrees = mFromDegrees;
-        float degrees = fromDegrees + ((mToDegrees - fromDegrees) * interpolatedTime);
+        float degreesX = mFromDegreesX + ((mToDegreesX - mFromDegreesX) * interpolatedTime);
+        float degreesY = mFromDegreesY + ((mToDegreesY - mFromDegreesY) * interpolatedTime);
+        float degreesZ = mFromDegreesZ + ((mToDegreesZ - mFromDegreesZ) * interpolatedTime);
 
         final float centerX = mCenterX;
         final float centerY = mCenterY;
@@ -60,14 +70,14 @@ public class Rotate3dAnimation extends Animation {
         final Matrix matrix = t.getMatrix();
 
         camera.save();
-        // 调节深度
+        // 摄像机
         if (mReverse) {
             camera.translate(0.0f, 0.0f, mDepthZ * interpolatedTime);
         } else {
             camera.translate(0.0f, 0.0f, mDepthZ * (1.0f - interpolatedTime));
         }
         // 绕y轴旋转
-        camera.rotateY(degrees);
+        camera.rotate(degreesX,degreesY,degreesZ);
         camera.getMatrix(matrix);
         camera.restore();
 
@@ -80,6 +90,6 @@ public class Rotate3dAnimation extends Animation {
 
         // 调节中心点，旋转中心默认是坐标原点，对于图片来说就是左上角位置。
         matrix.preTranslate(-centerX, -centerY); // 使用pre将旋转中心移动到和Camera位置相同
-        matrix.postTranslate(centerX, centerY);  // 使用post将图片(View)移动到原来的位置
+        matrix.postTranslate(centerX, centerY);  // 移动并修正位置
     }
 }
