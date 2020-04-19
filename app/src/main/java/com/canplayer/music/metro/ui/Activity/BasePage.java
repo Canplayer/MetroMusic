@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -21,46 +22,186 @@ import androidx.appcompat.app.AppCompatDelegate;
 import com.canplayer.music.metro.Setting;
 import com.canplayer.music.metro.animation.defaultanimation.DefaultAnimation;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 
 @SuppressLint("Registered")
 public class BasePage extends AppCompatActivity {
 
+    //定义系统主题的三个状态
     private enum PageThemeSettings {
         Light,
         Black,
         Auto
     }
+    //定义主题的状态
     private enum PageTheme {
         Light,
         Black
     }
-    static boolean isThemeFallowAndroid;
-    private PageTheme pageTheme;
+
+    //保存onCreate时获取到的系统主题
     private PageThemeSettings onCreateTheme;
+    //当前页面的主题
+    private PageTheme pageTheme;
+    //保存用于设置
+    private List<View> animationSubView = null;
+
+    //
+    static boolean isThemeFallowAndroid;
+
+    //判断自己是否是新view，用来决定动画走向
+    private boolean isNewPage = true;
+
+    //是否正在播放动画
+    private static boolean isPlayAnmin = false;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        initTheme(onCreateTheme = pageThemeSettings());
+        //创建的时候保存启动时系统的主题，以便从其他页面跳转回来的时候更新判断主题
+        initTheme(onCreateTheme = getPageThemeFromSettings());
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(isNewPage) {
+            if(animationSubView != null)
+            {
+                startViewAnimation(animationSubView,true, DefaultAnimation.AnimationType.IN);
+            }
+            else{
+                startPageAnim(DefaultAnimation.AnimationType.IN);
+            }
+        }
+        else {
+            if(animationSubView != null)
+            {
+                startViewAnimation(animationSubView,true, DefaultAnimation.AnimationType.BACK);
+            }
+            else{
+                startPageAnim(DefaultAnimation.AnimationType.BACK);
+            }
+        }
+
         initBar();
     }
 
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            Log.d("提示","获取到返回键事件"+isPlayAnmin);
+            if(!isPlayAnmin) {
+                    if (animationSubView != null) {
+                        startViewAnimation(animationSubView, true, DefaultAnimation.AnimationType.OUT);
+                    } else {
+                        startPageAnim(DefaultAnimation.AnimationType.OUT);
+                    }
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            finish();
+                        }
+                    }, 150);
+                }
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    //以下是本程序提供给用户的方法
     //-在setContentView后设置动画
     public void loadPageView(int layoutResID) {
         super.setContentView(layoutResID);
-        InPageAnim();
     }
-    public void loadPageView(int layoutResID, animationSetter l) {
-        super.setContentView(layoutResID);
-        getRootContentView().startAnimation(l.animation());
-    }
-    public void loadPageView(int layoutResID,boolean isAnimationOFF) {
-        super.setContentView(layoutResID);
-        if (!isAnimationOFF){
-            InPageAnim();
+    //-设置主题颜色
+    //注意，此设置不能再OnCreate中设置，否则可能会无限刷新
+    public void setTheme(PageTheme theme) {
+        pageTheme = theme;
+        switch (theme){
+            case Light:AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            case Black:AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
+        recreate();
+    }
+    //活得所有子View
+    public List<View> getAllChildView(View view) {
+        List<View> subView=new ArrayList<>();
+        if(view instanceof ViewGroup){
+            for(int i = ((ViewGroup) view).getChildCount();i>0;i--){
+                View tempView = ((ViewGroup) view).getChildAt(i-1);
+                subView.addAll(getAllChildView(tempView));
+            }
+            return subView;
+        }
+        subView.add(view);
+        return subView;
+    }
+    //读取和设置动画子
+    public List<View> getAnimationSubView() {
+        return animationSubView;
+    }
+    public void setAnimationSubView(List<View> animationSubView) {
+        this.animationSubView = animationSubView;
+    }
+    //设置View动画
+    public void startViewAnimation(final List<View> view, final Boolean reverse, final DefaultAnimation.AnimationType animationType) {
+        if(view == null)return;
+        if(animationType == DefaultAnimation.AnimationType.IN)
+        for(View view1 : view) {
+            view1.setVisibility(View.INVISIBLE);
+        }
+        if(reverse) {
+            Collections.reverse(view);
+        }
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(reverse) {
+                    int i = view.size() - 1;
+                    if (i >= 0) {
+                        Animation animation = null;
+                        switch (animationType){
+                            case IN:animation = new DefaultAnimation().inAnimation(view.get(i), getApplicationContext());break;
+                            case OUT:animation = new DefaultAnimation().outAnimation(view.get(i), getApplicationContext());break;
+                            case BACK:animation = new DefaultAnimation().backAnimation(view.get(i), getApplicationContext());break;
+                            case NEXT:animation = new DefaultAnimation().nextAnimation(view.get(i), getApplicationContext());break;
+                        }
+                        animation.setAnimationListener(new Animation.AnimationListener() {
+                            @Override
+                            public void onAnimationStart(Animation animation) {
+                                isPlayAnmin = true;
+                            }
+
+                            @Override
+                            public void onAnimationEnd(Animation animation) {
+                                isPlayAnmin = false;
+                            }
+
+                            @Override
+                            public void onAnimationRepeat(Animation animation) {
+
+                            }
+                        });
+                        view.get(i).startAnimation(animation);
+                        view.get(i).setVisibility(View.VISIBLE);
+
+                        startViewAnimation(view.subList(0, i), false,animationType);
+                    }
+                }
+            }
+        },10);
     }
 
+
+
+    //以下是未公开给基类的方法，通常用于初始化
     //-设置沉浸,由于设置状态栏沉浸需要API23以上，未来如需要兼容旧版本可以去掉沉浸
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void initBar(){
@@ -87,21 +228,7 @@ public class BasePage extends AppCompatActivity {
         }
 
     }
-
-    //-设置主题为浅色
-    public void setLightTheme() {
-        pageTheme = PageTheme.Light;
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        recreate();
-    }
-    //-设置主题为深色
-    public void setBlackTheme() {
-        pageTheme = PageTheme.Black;
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        recreate();
-    }
-
-    //-获取系统当前主题
+    //-读取系统系统当前主题设置
     private PageTheme readSystemTheme(Configuration newConfig) {
         if(isThemeFallowAndroid) {
             int mSysThemeConfig = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
@@ -114,19 +241,18 @@ public class BasePage extends AppCompatActivity {
         }
         return PageTheme.Black;
     }
-
-    //-监听系统主题变化
-    @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        switch (readSystemTheme(newConfig)){
-            case Black:setBlackTheme();break;
-            case Light:setLightTheme();break;
+    //-从SettingClass取全局主题设置 此项和上面的区别是，此项用于获取，PageTheme负责执行
+    private PageThemeSettings getPageThemeFromSettings() {
+        switch (Setting.getGlobalPageTheme())
+        {
+            case Light:return PageThemeSettings.Light;
+            case Black:return PageThemeSettings.Black;
+            case WithAndroid:return PageThemeSettings.Auto;
         }
+        return PageThemeSettings.Black;
     }
-    //初始化时用于获取Android当前主题
-    public void initTheme(PageThemeSettings pageThemeSettings){
-        Log.d("初始化","");
+    //初始化主题，传入pageThemeSettings,按照传入的设置系统主题 注意，此设置仅能在onCreate函数执行之前调用
+    private void initTheme(PageThemeSettings pageThemeSettings){
         switch (pageThemeSettings) {
             case Auto:
                 isThemeFallowAndroid = true;
@@ -142,35 +268,38 @@ public class BasePage extends AppCompatActivity {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);break;
         }
     }
-
-    //-从SettingClass取全局主题设置
-    private PageThemeSettings pageThemeSettings() {
-        switch (Setting.getGlobalPageTheme())
-        {
-            case Light:return PageThemeSettings.Light;
-            case Black:return PageThemeSettings.Black;
-            case WithAndroid:return PageThemeSettings.Auto;
-        }
-        return PageThemeSettings.Black;
-    }
-
-    //TODO 待优化回到该页面的时候检查主题设置是否一致
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(onCreateTheme != pageThemeSettings()) recreate();
-    }
-
     //获取XML根控件,在本类中被用于设置动画
-    public View getRootContentView() {
+    private View getRootContentView() {
         ViewGroup view = (ViewGroup) getWindow().getDecorView().findViewById(android.R.id.content);
         return view.getChildAt(0);
     }
-
     //设置页面进入动画
-    private void InPageAnim() {
+    private void startPageAnim(DefaultAnimation.AnimationType animationType) {
         final View view = getRootContentView();
-        Animation animation = new DefaultAnimation().inAnimation_Page(getApplicationContext().getResources().getDisplayMetrics().heightPixels,BasePage.this);
+        Animation animation = new DefaultAnimation().inAnimation_Page(getApplicationContext());
+        switch (animationType){
+            case IN:animation =new DefaultAnimation().inAnimation_Page(getApplicationContext());break;
+            case OUT:animation =new DefaultAnimation().outAnimation(view,getApplicationContext());break;
+            case NEXT:animation =new DefaultAnimation().nextAnimation(view,getApplicationContext());break;
+            case BACK:animation =new DefaultAnimation().backAnimation(view,getApplicationContext());break;
+        }
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                isPlayAnmin = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                isPlayAnmin = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        animation.setFillAfter(true);
         getRootContentView().startAnimation(animation);
         view.post(new Runnable() {
             @Override
@@ -181,36 +310,67 @@ public class BasePage extends AppCompatActivity {
         });
     }
 
-    //页面结束
-    @Override
+
+
+
+    //以下是对Android默认方法进行的重写
+
+    //页面结束，此处将Android默认的推出动画关闭了。这里不推荐永华使用
+    @Override @Deprecated
     public void finish() {
         //TODO 在此处实现页面跳转动画;此处有个问题，如果切换主题模式后按下返回键会发生闪烁
-
         super.finish();
         overridePendingTransition(0, 0);
     }
-
-    //页面跳转
+    //跳转指定页面跳转
     public void openPage(final Class newPageClass) {
         //TODO 在此处实现页面跳转动画
         //将本activity传入下一个页面，以便设置主题
+        isNewPage = false;
         final Intent intent = new Intent(this,newPageClass);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        Animation animation = new DefaultAnimation().outAnimation(getRootContentView(),this);
-
-        new Handler().postDelayed(new Runnable() {
+        Animation animation = new DefaultAnimation().nextAnimation(getRootContentView(),this);
+        animation.setFillAfter(true);
+        animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void run() {
+            public void onAnimationStart(Animation animation) {
+                isPlayAnmin = true;
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                isPlayAnmin = false;
                 startActivity(intent);
             }
-        },100);
 
-        //animation.setFillAfter(true);
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
         getRootContentView().startAnimation(animation);
 
     }
-    
-
-
+    //-监听系统主题变化 其中实现了当主题变化的时候重新设定主题的操作
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        switch (readSystemTheme(newConfig)){
+            case Black:setTheme(PageTheme.Light);break;
+            case Light:setTheme(PageTheme.Black);break;
+        }
+    }
+    //在恢复的时候检查主题是否一致
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(onCreateTheme != getPageThemeFromSettings()) recreate();
+    }
+    //单纯的不推荐用户继续使用这个函数加载View
+    @Override @Deprecated
+    public void setContentView(int layoutResID) {
+        super.setContentView(layoutResID);
+    }
 }
 

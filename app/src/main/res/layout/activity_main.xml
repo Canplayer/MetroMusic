@@ -11,8 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:orientation="vertical"
-        android:background="#999">
+        android:orientation="vertical">
 
         <Button
             android:id="@+id/button4"

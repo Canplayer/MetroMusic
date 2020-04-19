@@ -21,7 +21,7 @@ public class BaseRotate3dAnimation extends Animation {
     private final float mDepthZ;
     private final boolean mReverse;
     private Camera mCamera;
-    float scale = 1;    // 像素密度
+    private float scale = 1;    // 像素密度
 
     /**
      * 创建一个绕 y 轴旋转的3D动画效果，旋转过程中具有深度调节，可以指定旋转中心。
@@ -49,7 +49,7 @@ public class BaseRotate3dAnimation extends Animation {
         mDepthZ = depthZ;
         mReverse = reverse;
         // 获取手机像素密度 （即dp与px的比例）
-        scale =context.getResources().getDisplayMetrics().density;
+        scale = context.getResources().getDisplayMetrics().density*2.8f;
     }
 
     @Override
@@ -89,7 +89,10 @@ public class BaseRotate3dAnimation extends Animation {
         matrix.setValues(mValues);                //重新赋值
 
         // 调节中心点，旋转中心默认是坐标原点，对于图片来说就是左上角位置。
-        matrix.preTranslate(-centerX, -centerY); // 使用pre将旋转中心移动到和Camera位置相同
-        matrix.postTranslate(centerX, centerY);  // 移动并修正位置
+        //matrix.preTranslate(-centerX, -centerY); // 移动Camera位置（会导致画面偏移）
+        //matrix.postTranslate(centerX, centerY);  // 修正移动Camera产生的位移
+
+        matrix.preTranslate(-centerX, -centerY); // 移动Camera位置（会导致画面偏移）
+        matrix.postTranslate(centerX, centerY);  // 修正移动Camera产生的位移
     }
 }
