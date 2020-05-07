@@ -2,31 +2,54 @@ package com.canplayer.music;
 
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 
+import com.canplayer.music.metro.animation.ViewAnimationGroup;
 import com.canplayer.music.metro.animation.defaultanimation.DefaultAnimation;
 import com.canplayer.music.metro.ui.Activity.BasePage;
 
+import java.util.ArrayList;
 import java.util.List;
+
 
 public class AboutActivity extends BasePage {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         loadPageView(R.layout.activity_about);
-        setAnimationSubView(getAllChildView(findViewById(android.R.id.content)));
+        super.onCreate(savedInstanceState);
+
+        ViewAnimationGroup viewAnimationGroup = new ViewAnimationGroup();
+        for(View a :getAllChildView(findViewById(android.R.id.content))){
+            viewAnimationGroup.add(a, DefaultAnimation.AnimationType.IN);
+        }
+        viewAnimationGroup.setTimeCell(10);
+        viewAnimationGroup.setHideInStart(true);
+        PageInAnimGroup.add(viewAnimationGroup);
+
+        ViewAnimationGroup viewAnimationGroup2 = new ViewAnimationGroup();
+        for(View a :getAllChildView(findViewById(android.R.id.content))){
+            viewAnimationGroup2.add(a, DefaultAnimation.AnimationType.OUT);
+        }
+        viewAnimationGroup2.setTimeCell(10);
+        PageOutAnimGroup.add(viewAnimationGroup2);
+
+
 
 
         this.findViewById(R.id.button7).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startViewAnimation(getAnimationSubView(),true, DefaultAnimation.AnimationType.IN);
+
             }
         });
         this.findViewById(R.id.button8).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startViewAnimation(getAnimationSubView(),true, DefaultAnimation.AnimationType.NEXT);
+                //startViewAnimation(getAnimationSubView(),true, DefaultAnimation.AnimationType.NEXT,null);
             }
         });
     }
@@ -35,4 +58,17 @@ public class AboutActivity extends BasePage {
 
 
 
+
+    public List<View> getAllChildView(View view) {
+    List<View> subView=new ArrayList<>();
+    if(view instanceof ViewGroup){
+        for(int i = ((ViewGroup) view).getChildCount();i>0;i--){
+            View tempView = ((ViewGroup) view).getChildAt(i-1);
+            subView.addAll(getAllChildView(tempView));
+        }
+        return subView;
+    }
+    subView.add(view);
+    return subView;
+    }
 }

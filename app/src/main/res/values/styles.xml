@@ -13,6 +13,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <!--<item name="android:navigationBarColor"></item>-->
         <item name="android:background">@color/background</item>
+
     </style>
 
 </resources>
