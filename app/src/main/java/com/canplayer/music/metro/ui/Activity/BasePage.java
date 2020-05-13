@@ -19,15 +19,12 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import com.canplayer.music.metro.Setting;
 import com.canplayer.music.metro.animation.ViewAnimationGroup;
+import com.canplayer.music.metro.animation.ViewAnimationGroupListener;
 import com.canplayer.music.metro.animation.defaultanimation.DefaultAnimation;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
-interface onAnimationEndListener{
-    void onAnimationEnd();
-}
 
 
 @SuppressLint("Registered")
@@ -95,7 +92,6 @@ public class BasePage extends AppCompatActivity {
             startPageAnimation(DefaultAnimation.AnimationType.BACK,null);
         }
         isNewPage = false;
-
     }
     //这个方法有时候不会被执行到，很奇怪，已经抛弃
     @Override
@@ -103,6 +99,19 @@ public class BasePage extends AppCompatActivity {
         Log.d("Activity","捕获到onRestart");
         super.onRestart();
     }
+
+    @Override
+    protected void onStop() {
+        Log.d("Activity","捕获到onStop");
+        super.onStop();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.d("Activity","捕获到onPause");
+        super.onPause();
+    }
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putBoolean("isNewPage",isNewPage);
@@ -215,7 +224,7 @@ public class BasePage extends AppCompatActivity {
     public List<ViewAnimationGroup> PageNextAnimGroup = new ArrayList<>();
     public List<ViewAnimationGroup> PageBackAnimGroup = new ArrayList<>();
     //设置页面进入动画
-    void startPageAnimation(DefaultAnimation.AnimationType animationType, final onAnimationEndListener l){
+    void startPageAnimation(DefaultAnimation.AnimationType animationType, final ViewAnimationGroupListener l){
         List<ViewAnimationGroup>  global = new ArrayList<>();
         ViewAnimationGroup pageAnimation = new ViewAnimationGroup();
         if(pageAnimStyle == PageAnimStyle.Rotate)switch (animationType) {
@@ -231,20 +240,10 @@ public class BasePage extends AppCompatActivity {
             case BACK: global.addAll(PageBackAnimGroup);break;
         }
         global.add(pageAnimation);
-        pageAnimation.setAnimationListener(new Animation.AnimationListener() {
+        pageAnimation.setAnimationListener(new ViewAnimationGroupListener() {
             @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
+            public void onAnimationEnd() {
                 if(l != null)l.onAnimationEnd();
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
             }
         });
         new ViewAnimationGroup().startMultiAnimation(global);
@@ -274,7 +273,7 @@ public class BasePage extends AppCompatActivity {
         //将本activity传入下一个页面，以便设置主题
         final Intent intent = new Intent(this,newPageClass);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        startPageAnimation(DefaultAnimation.AnimationType.NEXT, new onAnimationEndListener() {
+        startPageAnimation(DefaultAnimation.AnimationType.NEXT, new ViewAnimationGroupListener() {
             @Override
             public void onAnimationEnd() {
                 startActivity(intent);
@@ -304,7 +303,7 @@ public class BasePage extends AppCompatActivity {
             Log.d("提示","获取到返回键事件"+ isPlayAnim);
             //TODO
             if(!isPlayAnim) {
-                startPageAnimation(DefaultAnimation.AnimationType.OUT, new onAnimationEndListener() {
+                startPageAnimation(DefaultAnimation.AnimationType.OUT, new ViewAnimationGroupListener() {
                     @Override
                     public void onAnimationEnd() {
                         finish();

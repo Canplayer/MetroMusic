@@ -1,8 +1,6 @@
 package com.canplayer.music.metro.animation;
 
-import android.content.Context;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 
@@ -16,23 +14,8 @@ public class ViewAnimationGroup{
     List<Animation> animations = new ArrayList<>();
     List<Integer> viewVisibility = new ArrayList<>();
     List<DefaultAnimation.AnimationType> animationTypes = new ArrayList<>();
+    ViewAnimationGroupListener viewAnimationGroupListener = null;
 
-    Animation.AnimationListener animationListener = new Animation.AnimationListener() {
-        @Override
-        public void onAnimationStart(Animation animation) {
-
-        }
-
-        @Override
-        public void onAnimationEnd(Animation animation) {
-
-        }
-
-        @Override
-        public void onAnimationRepeat(Animation animation) {
-
-        }
-    };
     int timeCell = 0;
     boolean isHideInStart = false;
 
@@ -48,7 +31,6 @@ public class ViewAnimationGroup{
     }
 
     public void start(){
-        animationListener.onAnimationStart(animations.get(0));
         //如果开始的时候要全部隐藏，先将所有的View可见性状态保存起来
         if(isHideInStart)
             for(View v : views){
@@ -91,8 +73,8 @@ public class ViewAnimationGroup{
 //        },time);
 //    }
 
-    public void setAnimationListener(Animation.AnimationListener animationGroupListener) {
-        animationListener = animationGroupListener;
+    public void setAnimationListener(ViewAnimationGroupListener SetViewAnimationGroupListener) {
+        viewAnimationGroupListener = SetViewAnimationGroupListener;
     }
 
     public void setHideInStart(boolean hideInStart) {
@@ -103,13 +85,7 @@ public class ViewAnimationGroup{
         this.timeCell = timeCell;
     }
 
-
-
-
-
-
     private void startAnimation() {
-        animationListener.onAnimationStart(animations.get(0));
 
         for(int i = 0;i<views.size();i++){
 
@@ -124,17 +100,15 @@ public class ViewAnimationGroup{
             if(i+1 == animations.size()) animation.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
-
                 }
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    animationListener.onAnimationEnd(animation);
+                    if(viewAnimationGroupListener != null)viewAnimationGroupListener.onAnimationEnd();
                 }
 
                 @Override
                 public void onAnimationRepeat(Animation animation) {
-                    animationListener.onAnimationRepeat(animation);
                 }
             });
             views.get(i).startAnimation(animation);
@@ -160,12 +134,11 @@ public class ViewAnimationGroup{
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                animationListener.onAnimationEnd(animation);
+                if(viewAnimationGroupListener != null)viewAnimationGroupListener.onAnimationEnd();
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {
-                animationListener.onAnimationRepeat(animation);
             }
         });
         views.get(index).startAnimation(animation);
@@ -178,8 +151,11 @@ public class ViewAnimationGroup{
         },timeCell);
     }
 
-
-
+    public void cleanAllFlag(){
+        for(View v:views){
+            v.clearAnimation();
+        }
+    }
 
     public void startMultiAnimation(List<ViewAnimationGroup> MultiAnimation) {
         for(ViewAnimationGroup v : MultiAnimation){
@@ -200,4 +176,6 @@ public class ViewAnimationGroup{
         }
         return animation;
     }
+
+
 }

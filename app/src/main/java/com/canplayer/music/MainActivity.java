@@ -1,6 +1,7 @@
 package com.canplayer.music;
 
 
+import android.app.LocalActivityManager;
 import android.os.Bundle;
 import android.view.View;
 
@@ -29,6 +30,7 @@ public class MainActivity extends BasePage {
         viewAnimationGroup.setTimeCell(500);
         viewAnimationGroup.setHideInStart(true);
         PageInAnimGroup.add(viewAnimationGroup);
+
 
 
         {
