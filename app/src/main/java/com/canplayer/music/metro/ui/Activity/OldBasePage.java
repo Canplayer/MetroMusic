@@ -28,7 +28,7 @@ import java.util.List;
 
 
 @SuppressLint("Registered")
-public class BasePage extends AppCompatActivity {
+public class OldBasePage extends AppCompatActivity {
 
     //定义系统主题的三个状态
     private enum PageThemeSettings {

@@ -3,19 +3,16 @@ package com.canplayer.music;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
 
 import com.canplayer.music.metro.animation.ViewAnimationGroup;
 import com.canplayer.music.metro.animation.defaultanimation.DefaultAnimation;
-import com.canplayer.music.metro.ui.Activity.BasePage;
+import com.canplayer.music.metro.ui.Activity.OldBasePage;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class AboutActivity extends BasePage {
+public class AboutActivity extends OldBasePage {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
