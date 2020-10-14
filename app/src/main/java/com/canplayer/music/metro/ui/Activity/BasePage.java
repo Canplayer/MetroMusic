@@ -1,10 +1,13 @@
 package com.canplayer.music.metro.ui.Activity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewTreeObserver;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,10 +22,8 @@ import com.canplayer.music.metro.animation.defaultanimation.DefaultAnimation;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BasePage extends AppCompatActivity {
-    public enum PageTheme{Light,Black,Auto}
+public class BasePage extends Activity {
 
-    PageTheme pageTheme = PageTheme.Auto;
     public List<ViewAnimationGroup> PageInAnimGroup = new ArrayList<>();
     public List<ViewAnimationGroup> PageOutAnimGroup = new ArrayList<>();
     public List<ViewAnimationGroup> PageNextAnimGroup = new ArrayList<>();
@@ -31,43 +32,46 @@ public class BasePage extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) { 
         restore(savedInstanceState);
-        initTheme();
         super.onCreate(savedInstanceState);
         initSystemBar();
+        playPageInAnim();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        for(ViewAnimationGroup a:PageInAnimGroup){
-            a.start();
-        }
+    private void playPageInAnim() {
+        final ViewTreeObserver viewTreeObserver = this.getWindow().getDecorView().getViewTreeObserver();
+        viewTreeObserver.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                for(ViewAnimationGroup a:PageInAnimGroup){
+                    a.start();
+                }
+                // 移除OnPreDrawListener事件监听
+                BasePage.this.getWindow().getDecorView().getViewTreeObserver().removeOnPreDrawListener(this);
+                return true;
+            }
+        });
     }
 
-    //初始化主题颜色
-    private void initTheme() {
-        switch (pageTheme) {
-            case Light: AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);break;
-            case Black:AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);break;
-            default: switch (Setting.getGlobalPageTheme()){
-                case Light: AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);break;
-                case Black:AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);break;
-                default:AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-            };
-
-        }
-    }
 
     //恢复数据
     private void restore(Bundle savedInstanceState){
         if (savedInstanceState != null) {
             //恢复数据
-            switch (savedInstanceState.getInt("pageThemeSetting")){
-                case 1:pageTheme=PageTheme.Light;break;
-                case 2:pageTheme=PageTheme.Black;break;
-                default:pageTheme=PageTheme.Auto;
-            }
         }
+    }
+
+    public void openPage(final Class newPageClass) {
+        //TODO 在此处实现页面跳转动画
+        //将本activity传入下一个页面，以便设置主题
+        final Intent intent = new Intent(this,newPageClass);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(intent);
+//        startPageAnimation(DefaultAnimation.AnimationType.NEXT, new ViewAnimationGroupListener() {
+//            @Override
+//            public void onAnimationEnd() {
+//                startActivity(intent);
+//            }
+//        });
     }
 
     //初始化沉浸/控件颜色
@@ -91,57 +95,26 @@ public class BasePage extends AppCompatActivity {
 
     }
 
-    //设置主题
-    public void setTheme(PageTheme theme) {
-        pageTheme = theme;
-        switch (theme){
-            case Light:pageTheme=PageTheme.Light;break;
-            case Auto:pageTheme=PageTheme.Auto;break;
-            default:pageTheme=PageTheme.Black;
-        }
-        recreate();
-    }
     //保存状态
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        int pageThemeNub =0;
-        switch (pageTheme){
-            case Light:pageThemeNub=1;break;
-            case Black:pageThemeNub=2;break;
-            default:pageThemeNub=0;
-        }
         outState.putBoolean("isNewPage?",true);
-        outState.putInt("pageThemeSetting",pageThemeNub);
         super.onSaveInstanceState(outState);
     }
 
-    //监听主题变化
     @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if(pageTheme == PageTheme.Auto){
-            if(Setting.getGlobalPageTheme()== Setting.GlobalPageTheme.WithAndroid){
-                recreate();
-            }
+    public void finish() {
+        for(ViewAnimationGroup a:PageOutAnimGroup){
+            a.start();
         }
+        super.finish();
+
     }
 
     void startPageAnimation(List<ViewAnimationGroup> animation, final ViewAnimationGroupListener l){
-        List<ViewAnimationGroup>  global = new ArrayList<>();
         ViewAnimationGroup pageAnimation = new ViewAnimationGroup();
-        if(pageAnimStyle == OldBasePage.PageAnimStyle.Rotate)switch (animationType) {
-            case IN: pageAnimation.add(getRootContentView(),new DefaultAnimation().inAnimation_Page(getBaseContext()));break;
-            case OUT: pageAnimation.add(getRootContentView(),new DefaultAnimation().outAnimation(getRootContentView()));break;
-            case NEXT: pageAnimation.add(getRootContentView(),new DefaultAnimation().nextAnimation(getRootContentView()));break;
-            case BACK: pageAnimation.add(getRootContentView(),new DefaultAnimation().backAnimation_Page(getBaseContext()));break;
-        }
-        switch (animationType) {
-            case IN: global.addAll(PageInAnimGroup);break;
-            case OUT: global.addAll(PageOutAnimGroup);break;
-            case NEXT: global.addAll(PageNextAnimGroup);break;
-            case BACK: global.addAll(PageBackAnimGroup);break;
-        }
-        global.add(pageAnimation);
+
+        animation.add(pageAnimation);
         pageAnimation.setAnimationListener(new ViewAnimationGroupListener() {
             @Override
             public void onAnimationEnd() {
@@ -149,6 +122,6 @@ public class BasePage extends AppCompatActivity {
                 if(l != null)l.onAnimationEnd();
             }
         });
-        new ViewAnimationGroup().startMultiAnimation(global);
+        new ViewAnimationGroup().startMultiAnimation(animation);
     }
 }

@@ -13,6 +13,8 @@ import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
 
 import com.canplayer.music.metro.animation.Baseanimation.BaseRotate3dAnimation;
 
+import static androidx.constraintlayout.widget.Constraints.TAG;
+
 public class DefaultAnimation{
     public enum AnimationType {
         IN, OUT, NEXT, BACK;
@@ -35,7 +37,7 @@ public class DefaultAnimation{
         int pointY = screenY-viewY;
         Log.d("获取控件位置信息", viewX+" "+viewY+"/"+screenX+" "+screenY+"/"+pointX+" "+pointY);
         BaseRotate3dAnimation rotate3dAnimation = new BaseRotate3dAnimation(new float[]{0,90,0},new float[]{0,0,0},pointX,pointY,0,false,view.getContext());
-        rotate3dAnimation.setDuration(300);
+        rotate3dAnimation.setDuration(850);
         rotate3dAnimation.setInterpolator(new LinearOutSlowInInterpolator());
         rotate3dAnimation.setFillAfter(true);
         return rotate3dAnimation;
