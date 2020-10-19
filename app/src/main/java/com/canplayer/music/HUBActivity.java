@@ -1,21 +1,23 @@
 package com.canplayer.music;
 
-import android.app.Activity;
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.view.MotionEvent;
+import android.view.TouchDelegate;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.canplayer.music.metro.animation.ViewAnimationGroup;
 import com.canplayer.music.metro.animation.defaultanimation.DefaultAnimation;
 import com.canplayer.music.metro.ui.Activity.BasePage;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class HUBActivity extends BasePage {
 
@@ -23,6 +25,24 @@ public class HUBActivity extends BasePage {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         super.setContentView(R.layout.activity_hubtest);
+
+        ((TextView)findViewById(R.id.editText)).setText("10000");
+        ((TextView)findViewById(R.id.editText2)).setText("2500");
+        ((TextView)findViewById(R.id.editText3)).setText("10000");
+        ((TextView)findViewById(R.id.editText4)).setText("600");
+        ((TextView)findViewById(R.id.editText5)).setText("10000");
+
+        ViewPager2 viewPager2 = findViewById(R.id.hubbody);
+        viewPager2.setOffscreenPageLimit(1);
+        viewPager2.setAdapter(new HubPagerAdapter());
+        RecyclerView recyclerView  = (RecyclerView)viewPager2.getChildAt(0);
+        recyclerView.setPadding(0,0,100,0);
+        recyclerView.setClipToPadding(false);
+        viewPager2.setCurrentItem(20,false);
+
+
+
+
 
         ViewAnimationGroup viewAnimationGroup = new ViewAnimationGroup();
 

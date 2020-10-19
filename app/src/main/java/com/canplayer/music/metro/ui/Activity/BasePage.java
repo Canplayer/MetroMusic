@@ -30,7 +30,8 @@ public class BasePage extends Activity {
     public List<ViewAnimationGroup> PageBackAnimGroup = new ArrayList<>();
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) { 
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        getWindow().setBackgroundDrawable(null);
         restore(savedInstanceState);
         super.onCreate(savedInstanceState);
         initSystemBar();
