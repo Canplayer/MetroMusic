@@ -1,9 +1,6 @@
 package com.canplayer.music.metro.animation.defaultanimation;
 
 import android.content.Context;
-import android.content.res.TypedArray;
-import android.os.Handler;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
@@ -12,8 +9,7 @@ import android.view.animation.Animation;
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
 
 import com.canplayer.music.metro.animation.Baseanimation.BaseRotate3dAnimation;
-
-import static androidx.constraintlayout.widget.Constraints.TAG;
+import com.canplayer.music.metro.animation.interpolator.MetroInterpolator;
 
 public class DefaultAnimation{
     public enum AnimationType {
@@ -37,8 +33,8 @@ public class DefaultAnimation{
         int pointY = screenY-viewY;
         Log.d("获取控件位置信息", viewX+" "+viewY+"/"+screenX+" "+screenY+"/"+pointX+" "+pointY);
         BaseRotate3dAnimation rotate3dAnimation = new BaseRotate3dAnimation(new float[]{0,90,0},new float[]{0,0,0},pointX,pointY,0,false,view.getContext());
-        rotate3dAnimation.setDuration(850);
-        rotate3dAnimation.setInterpolator(new LinearOutSlowInInterpolator());
+        rotate3dAnimation.setDuration(1000);
+        rotate3dAnimation.setInterpolator(new MetroInterpolator());
         rotate3dAnimation.setFillAfter(true);
         return rotate3dAnimation;
     }
@@ -57,7 +53,7 @@ public class DefaultAnimation{
         Log.d("获取控件位置信息", viewX+" "+viewY+"/"+screenX+" "+screenY+"/"+pointX+" "+pointY);
         BaseRotate3dAnimation rotate3dAnimation = new BaseRotate3dAnimation(new float[]{0,0,0},new float[]{0,90,0},pointX,pointY,0,false,view.getContext());
         rotate3dAnimation.setDuration(150);
-        rotate3dAnimation.setInterpolator(new AccelerateInterpolator());
+        rotate3dAnimation.setInterpolator(new MetroInterpolator(true));
         rotate3dAnimation.setFillAfter(true);
         return rotate3dAnimation;
     }
@@ -76,7 +72,7 @@ public class DefaultAnimation{
         Log.d("获取控件位置信息", viewX+" "+viewY+"/"+screenX+" "+screenY+"/"+pointX+" "+pointY);
         BaseRotate3dAnimation rotate3dAnimation = new BaseRotate3dAnimation(new float[]{0,0,0},new float[]{0,-90,0},pointX,pointY,0,false,view.getContext());
         rotate3dAnimation.setDuration(150);
-        rotate3dAnimation.setInterpolator(new AccelerateInterpolator());
+        rotate3dAnimation.setInterpolator(new MetroInterpolator(true));
         rotate3dAnimation.setFillAfter(true);
         return rotate3dAnimation;
     }
@@ -95,7 +91,7 @@ public class DefaultAnimation{
         Log.d("获取控件位置信息", viewX+" "+viewY+"/"+screenX+" "+screenY+"/"+pointX+" "+pointY);
         BaseRotate3dAnimation rotate3dAnimation = new BaseRotate3dAnimation(new float[]{0,-90,0},new float[]{0,0,0},pointX,pointY,0,false,view.getContext());
         rotate3dAnimation.setDuration(300);
-        rotate3dAnimation.setInterpolator(new  LinearOutSlowInInterpolator());
+        rotate3dAnimation.setInterpolator(new MetroInterpolator());
         rotate3dAnimation.setFillAfter(true);
         return rotate3dAnimation;
     }

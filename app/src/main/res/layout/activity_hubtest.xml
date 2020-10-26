@@ -16,12 +16,13 @@
         android:id="@+id/hubtitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-40dp"
+        android:layout_marginTop="-60dp"
         android:singleLine="true"
         android:ellipsize="none"
         android:gravity="fill_horizontal"
-        android:text="music+video"
-        android:textSize="110dp"/>
+        android:fontFamily="@font/segoeuil"
+        android:text="marketplace"
+        android:textSize="130dp"/>
 
 
     <androidx.viewpager2.widget.ViewPager2
@@ -48,8 +49,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="123"
-        app:layout_constraintStart_toEndOf="@+id/buttonshowhub"
-        app:layout_constraintTop_toTopOf="@+id/buttonshowhub" />
+        app:layout_constraintBottom_toTopOf="@+id/buttonshowhub"
+        app:layout_constraintStart_toStartOf="@+id/hubpage" />
 
     <EditText
         android:id="@+id/editText2"
@@ -81,5 +82,19 @@
         android:hint="123"
         app:layout_constraintStart_toEndOf="@+id/editText4"
         app:layout_constraintTop_toTopOf="@+id/editText4" />
+    <EditText
+        android:id="@+id/editText6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="123"
+        app:layout_constraintStart_toEndOf="@+id/editText5"
+        app:layout_constraintTop_toTopOf="@+id/editText5" />
+    <EditText
+        android:id="@+id/editText7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="123"
+        app:layout_constraintStart_toEndOf="@+id/editText6"
+        app:layout_constraintTop_toTopOf="@+id/editText6" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

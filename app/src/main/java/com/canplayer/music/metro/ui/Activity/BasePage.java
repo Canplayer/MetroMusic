@@ -22,7 +22,7 @@ import com.canplayer.music.metro.animation.defaultanimation.DefaultAnimation;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BasePage extends Activity {
+public class BasePage extends AppCompatActivity {
 
     public List<ViewAnimationGroup> PageInAnimGroup = new ArrayList<>();
     public List<ViewAnimationGroup> PageOutAnimGroup = new ArrayList<>();
