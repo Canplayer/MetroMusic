@@ -6,9 +6,12 @@ import static java.lang.Math.sqrt;
 
 public class MetroInterpolator implements Interpolator {
     boolean fangxiang = false;
-    int power = 4;
+    int power = 2;
     public MetroInterpolator(boolean fangxiang2,int power2){
         fangxiang =fangxiang2;
+        power= power2;
+    }
+    public MetroInterpolator(int power2){
         power= power2;
     }
     public MetroInterpolator(boolean fangxiang2){

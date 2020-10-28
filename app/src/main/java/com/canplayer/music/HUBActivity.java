@@ -49,14 +49,14 @@ public class HUBActivity extends BasePage {
 
         viewAnimationGroup.add(findViewById(R.id.hubpage), DefaultAnimation.AnimationType.IN);
 
-        Animation animation2 = new TranslateAnimation(2500, 0, 0, 0);
-        animation2.setInterpolator(new MetroInterpolator(false,3));
-        animation2.setDuration(1500);
+        Animation animation2 = new TranslateAnimation(4000, 0, 0, 0);
+        animation2.setInterpolator(new MetroInterpolator());
+        animation2.setDuration(1300);
         viewAnimationGroup.add(findViewById(R.id.hubtitle), animation2);
 
-        Animation animation3 = new TranslateAnimation(1200, 0, 0, 0);
-        animation3.setInterpolator(new MetroInterpolator(false,3));
-        animation3.setDuration(1500);
+        Animation animation3 = new TranslateAnimation(1500, 0, 0, 0);
+        animation3.setInterpolator(new MetroInterpolator());
+        animation3.setDuration(1300);
         viewAnimationGroup.add(findViewById(R.id.hubbody), animation3);
         viewAnimationGroup.setHideInStart(true);
         PageInAnimGroup.add(viewAnimationGroup);
