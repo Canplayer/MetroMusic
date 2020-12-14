@@ -6,7 +6,7 @@ import android.view.View;
 
 import com.canplayer.music.metro.animation.ViewAnimationGroup;
 import com.canplayer.music.metro.animation.defaultanimation.DefaultAnimation;
-import com.canplayer.music.metro.ui.Activity.BasePage;
+import com.canplayer.music.metro.ui.Page.BasePage;
 
 
 
@@ -37,6 +37,7 @@ public class MainActivity extends BasePage {
                     openPage(HUBActivity.class);
                 }
             });
+
         }
 
     }

@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 
 import com.canplayer.music.metro.animation.ViewAnimationGroup;
 import com.canplayer.music.metro.animation.defaultanimation.DefaultAnimation;
-import com.canplayer.music.metro.ui.Activity.BasePage;
+import com.canplayer.music.metro.ui.Page.BasePage;
 
 import java.util.ArrayList;
 import java.util.List;

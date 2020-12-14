@@ -9,12 +9,20 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".FragmentTestActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".metro.ui.Page.MainActivity" />
         <activity
             android:name=".AboutActivity"
-            android:label="6666关于个头"></activity>
+            android:label="6666关于个头" />
         <activity
             android:name=".HUBActivity"
-            android:label="傻逼hub测试页"></activity>
+            android:label="傻逼hub测试页" />
         <activity
             android:name=".MainActivity"
             android:configChanges="uiMode">

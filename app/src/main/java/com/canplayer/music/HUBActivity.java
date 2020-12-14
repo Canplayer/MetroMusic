@@ -7,14 +7,13 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
-import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.canplayer.music.metro.animation.ViewAnimationGroup;
 import com.canplayer.music.metro.animation.defaultanimation.DefaultAnimation;
 import com.canplayer.music.metro.animation.interpolator.MetroInterpolator;
-import com.canplayer.music.metro.ui.Activity.BasePage;
+import com.canplayer.music.metro.ui.Page.BasePage;
 
 import java.util.ArrayList;
 
